@@ -18,6 +18,7 @@ public class Game extends JFrame {
     private int ballMaxSpeed=6;
     private int defaultBallSpeed=2;
     private int ballSpeed=defaultBallSpeed;
+    private boolean speedUp=false;
 
     public Game() {
         balls=new ArrayList<>();
@@ -45,6 +46,10 @@ public class Game extends JFrame {
                     case 39:
                         player.setMovement(new Point(1, 0));
                         break;
+                    // Up arrow
+                    case 38:
+                        speedUp=true;
+                        break;
                 }
             }
             // Detect key press (up only)
@@ -58,6 +63,10 @@ public class Game extends JFrame {
                     case 39:
                         player.setMovement(new Point(0, 0));
                         break;
+                    // Up arrow
+                    case 38:
+                        speedUp=false;
+                        break;
                 }
             }
             // Detect general typing action (unused)
@@ -70,6 +79,17 @@ public class Game extends JFrame {
         setVisible(true);
     }
     private class GameGraphics extends Component {
+        private Color[] colors={
+                new Color(0, 0, 0),
+                new Color(255, 0, 0),
+                new Color(236, 137, 0),
+                new Color(220, 217, 0),
+                new Color(0, 198, 0),
+                new Color(0, 0, 255),
+                new Color(233, 0, 104),
+                new Color(217, 0, 217)
+        };
+
         private boolean firstTime=true;
         private boolean gameOver=false;
         private int gameOverCount=0;
@@ -79,6 +99,13 @@ public class Game extends JFrame {
         private int ballMax=1;
 
         private int score=0;
+        private boolean fading=false;
+        private int colorChangeThreshold=10;
+        private int currentColorIndex=0;
+        private int colorScore=0;
+        private int colorPhase=0;
+        private int defaultNextShrink=25;
+        private int nextShrink=defaultNextShrink;
 
         public GameGraphics() {
             Timer t=new Timer("animation");
@@ -100,7 +127,7 @@ public class Game extends JFrame {
 
                 ballThreshold=(int) Math.ceil(Math.random()*ballMultiplier);
 
-                balls.add(new Ball(getWidth()/2, getHeight()/2));
+                balls.add(new Ball((int)(Math.random()*getWidth()), (int)(Math.random()*(getHeight()/2))));
 
                 firstTime=false;
             }
@@ -128,6 +155,13 @@ public class Game extends JFrame {
                     // Check for paddle collision
                     if (ball.getX() - ball.getSize() / 2 < player.getX() + player.getWidth() && ball.getX() + ball.getSize() / 2 > player.getX() && ball.getY() + ball.getSize() / 2 > player.getY() && ball.getY() + ball.getSize() / 2 < player.getY() + player.getHeight()) {
                         score++;
+                        if(score>=nextShrink) {
+                            int diff=player.getWidth()-(player.getWidth()/3)*2;
+                            player.setX(player.getX()+diff/2);
+                            player.setWidth((player.getWidth()/6)*5);
+
+                            nextShrink*=2;
+                        }
 
                         ball.setDirection(new Point((int) ball.getDirection().getX(), -1));
                         ball.setDeltaX(Math.random()*Math.sqrt(2)/2+Math.sqrt(2)/2);
@@ -140,8 +174,10 @@ public class Game extends JFrame {
                         gameOver = true;
                     }
 
+                    if(speedUp) ballSpeed*=2;
                     ball.setX((ball.getX() + ball.getDirection().getX() * ballSpeed * ball.getDeltaX()));
                     ball.setY((ball.getY() + ball.getDirection().getY() * ballSpeed * ball.getDeltaY()));
+                    if(speedUp) ballSpeed/=2;
                 }
 
 
@@ -163,12 +199,15 @@ public class Game extends JFrame {
                     ballThreshold=0;
                     ballCount=0;
                     score=0;
+                    colorScore=0;
+                    currentColorIndex=0;
+                    nextShrink=defaultNextShrink;
                 }
                 gameOverCount++;
             }
 
             // Draw the background
-            g2.setColor(Color.BLACK);
+            g2.setColor(getCurrentColorIndex());
             g2.fillRect(0, 0, getWidth(), getHeight());
 
             player.draw(g2);
@@ -178,11 +217,49 @@ public class Game extends JFrame {
 
             g2.setFont(new Font("Arial", Font.PLAIN, 24));
             g2.drawString(score+"", 20, 40);
-
-//            System.out.println(balls.get(0).getDeltaX());
-//            System.out.print("  "+balls.get(0).getDeltaY());
-//            System.out.println("  "+balls.get(0).getDirection());
         }
+
+        private Color getCurrentColorIndex() {
+            if(!fading) {
+                if(score!=colorScore&&score%colorChangeThreshold==0) {
+                    fading=true;
+                }
+            }
+            else {
+                if(score!=colorScore) currentColorIndex++;
+                if(currentColorIndex>=colors.length) currentColorIndex=0;
+                colorScore=score;
+
+                if(colorPhase>=255) {
+                    fading=false;
+                    colorPhase=0;
+                }
+                else {
+                    int previousColorIndex=currentColorIndex-1;
+                    if(previousColorIndex<0) previousColorIndex=colors.length-1;
+
+                    Color current=colors[currentColorIndex];
+                    Color previous=colors[previousColorIndex];
+
+                    int r=colors[currentColorIndex].getRed()-colors[previousColorIndex].getRed();
+                    int g=colors[currentColorIndex].getGreen()-colors[previousColorIndex].getGreen();
+                    int b=colors[currentColorIndex].getBlue()-colors[previousColorIndex].getBlue();
+
+
+                    colorPhase+=5;
+
+                    //System.out.println(previous.getRed()+(r/255.0)*colorPhase);
+
+                    Color faded=new Color(
+                            (int)(previous.getRed()+(r/255.0)*colorPhase),
+                            (int)(previous.getGreen()+(g/255.0)*colorPhase),
+                            (int)(previous.getBlue()+(b/255.0)*colorPhase));
+                    return faded;
+                }
+            }
+            return colors[currentColorIndex];
+        }
+
         private Ball randomBall() {
             Ball b=new Ball((int)(Math.random()*getWidth()), (int)(Math.round(Math.random()*getHeight()/2)));
             b.setDirection(randomDirectionPoint());

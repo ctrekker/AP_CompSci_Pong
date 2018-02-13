@@ -35,7 +35,7 @@ public class Ball {
     public void draw(Graphics2D g2) {
         g2.setColor(Color.WHITE);
         g2.fillArc((int)(x-size/2), (int)(y-size/2), size, size, 0, 360);
-        int i=150;
+        int i=100;
         for(int e=0; e<trail.size(); e++) {
             Point p=trail.get(e);
             if(i>0) {
@@ -45,11 +45,19 @@ public class Ball {
             else {
                 trail.remove(e);
             }
-            i-=5;
+            i-=2;
         }
         g2.setColor(Color.WHITE);
 
         trail.add(0, new Point((int)x, (int)y));
+        if(trail.size()>1) {
+            Point p1=trail.get(0);
+            Point p2=trail.get(1);
+            int diffX=p1.x-p2.x;
+            int diffY=p1.y-p2.y;
+
+            trail.add(1, new Point(p1.x-diffX/2, p1.y-diffY/2));
+        }
     }
 
     // Various getters and setters
