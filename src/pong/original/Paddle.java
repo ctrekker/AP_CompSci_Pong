@@ -85,4 +85,9 @@ public class Paddle {
     public int getFirstY() {
         return firstY;
     }
+    public void switchOrientation() {
+        int preWidth=getWidth();
+        setWidth(getHeight());
+        setHeight(preWidth);
+    }
 }
