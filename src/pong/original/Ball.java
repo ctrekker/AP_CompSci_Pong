@@ -33,19 +33,23 @@ public class Ball {
     }
     // Draw the ball given a graphics object
     public void draw(Graphics2D g2) {
+        draw(g2, false);
+    }
+    public void draw(Graphics2D g2, boolean drawTail) {
         g2.setColor(Color.WHITE);
         g2.fillArc((int)(x-size/2), (int)(y-size/2), size, size, 0, 360);
-        int i=100;
-        for(int e=0; e<trail.size(); e++) {
-            Point p=trail.get(e);
-            if(i>0) {
-                g2.setColor(new Color(255, 255, 255, i));
-                g2.fillArc((p.x-size/2), (p.y-size/2), size, size, 0, 360);
+        if(drawTail) {
+            int i = 100;
+            for (int e = 0; e < trail.size(); e++) {
+                Point p = trail.get(e);
+                if (i > 0) {
+                    g2.setColor(new Color(255, 255, 255, i));
+                    g2.fillArc((p.x - size / 2), (p.y - size / 2), size, size, 0, 360);
+                } else {
+                    trail.remove(e);
+                }
+                i -= 2;
             }
-            else {
-                trail.remove(e);
-            }
-            i-=2;
         }
         g2.setColor(Color.WHITE);
 

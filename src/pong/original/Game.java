@@ -20,7 +20,7 @@ public class Game extends JFrame {
         // Original game resolution is usually 640x400
         setSize(640, 400);
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create graphics instance (component-based)
         GameGraphics graphics = new GameGraphics();

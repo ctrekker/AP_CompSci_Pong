@@ -28,7 +28,7 @@ public class Game extends JFrame {
         // Original game resolution is usually 640x400
         setSize(480, 600);
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create graphics instance (component-based)
         GameGraphics graphics = new GameGraphics();
@@ -212,7 +212,7 @@ public class Game extends JFrame {
 
             player.draw(g2);
             for(Ball ball : balls) {
-                ball.draw(g2);
+                ball.draw(g2, true);
             }
 
             g2.setFont(new Font("Arial", Font.PLAIN, 24));
