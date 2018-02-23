@@ -32,7 +32,7 @@ public class GameSelector extends JFrame {
         block.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                new pong.block.Game();
             }
         });
 
