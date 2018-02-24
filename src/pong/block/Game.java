@@ -15,9 +15,10 @@ public class Game extends JFrame {
     private Paddle player;
     private ArrayList<Ball> balls;
     private int paddleSpeed=6;
-    private int defaultBallSpeed=5;
+    private int defaultBallSpeed=4;
     private int ballSpeed=defaultBallSpeed;
     private boolean speedUp=false;
+    private int currentLevel=1;
 
     public Game() {
         balls=new ArrayList<>();
@@ -49,6 +50,12 @@ public class Game extends JFrame {
                     case 38:
                         speedUp=true;
                         break;
+                    // Down arrow
+                    case 40:
+                        currentLevel++;
+                        graphics.blocks.clear();
+                        graphics.setupBlocks(currentLevel);
+                        break;
                 }
             }
             // Detect key press (up only)
@@ -78,7 +85,7 @@ public class Game extends JFrame {
         setVisible(true);
     }
     private class GameGraphics extends Component {
-        private ArrayList<Block> blocks=new ArrayList<>();
+        public ArrayList<Block> blocks=new ArrayList<>();
 
         private boolean firstTime=true;
         private boolean gameOver=false;
@@ -91,8 +98,6 @@ public class Game extends JFrame {
         private int lastBlockHitCount=0;
 
         private int score=0;
-
-        private int currentLevel=1;
 
         public GameGraphics() {
             Timer t=new Timer("animation");
@@ -118,7 +123,11 @@ public class Game extends JFrame {
 
                 ballThreshold=(int) Math.ceil(Math.random()*ballMultiplier);
 
-                balls.add(new Ball((int)(Math.random()*getWidth()), (int)(Math.random()*(getHeight()/2))));
+                balls.add(new Ball(getWidth()/2, getHeight()-100));
+                int dirX=(int)(Math.random()*2);
+                if(dirX==0) dirX=-1;
+                balls.get(0).setDirection(new Point(dirX, 1));
+                balls.get(0).setDeltaX(0.00001);
 
                 firstTime=false;
             }
@@ -145,8 +154,6 @@ public class Game extends JFrame {
 
                     // Check for paddle collision
                     if (ball.getX() - ball.getSize() / 2 < player.getX() + player.getWidth() && ball.getX() + ball.getSize() / 2 > player.getX() && ball.getY() + ball.getSize() / 2 > player.getY() && ball.getY() + ball.getSize() / 2 < player.getY() + player.getHeight()) {
-                        score++;
-
                         ball.setDirection(new Point((int) ball.getDirection().getX(), -1));
                         ball.setDeltaX(Math.random()*Math.sqrt(2)/2+Math.sqrt(2)/2);
                         ball.setDeltaY(Math.sqrt(2-Math.pow(ball.getDeltaX(), 2)));
@@ -230,11 +237,18 @@ public class Game extends JFrame {
                     ballThreshold=0;
                     ballCount=0;
                     score=0;
+                    currentLevel=1;
                 }
                 gameOverCount++;
             }
 
             lastBlockHitCount++;
+
+            if(lastBlockHitCount>120&&blocks.size()==0&&balls.get(0).getY()>getHeight()-getHeight()/10) {
+                currentLevel++;
+                lastBlockHitCount=0;
+                setupBlocks(currentLevel);
+            }
 
             // Draw the background
             g2.setColor(Color.BLACK);
@@ -255,41 +269,37 @@ public class Game extends JFrame {
         }
         private void blockHit(int i) {
             Block block=blocks.get(i);
-            if(lastBlockHit!=i||lastBlockHitCount>=10) {
+            if(lastBlockHit!=i||lastBlockHitCount>=4) {
                 if (block.getStrength() <= 1) {
                     blocks.remove(i);
+                    score++;
                 } else {
                     block.setStrength(block.getStrength() - 1);
                 }
                 lastBlockHit=i;
             }
-            else {
-                System.out.println("DOUBLE!!!");
-            }
             lastBlockHitCount=0;
         }
 
-        private void setupBlocks(int level) {
+        public void setupBlocks(int level) {
             ArrayList<Block> b=new ArrayList<>();
 
-            if(level<=1) {
-                final int boxGap=30;
-                final int boxWidth=80;
-                final int boxHeight=40;
+            //if(level<=1) {
+                final int boxGap=10;
+                final int boxWidth=30;
+                final int boxHeight=15;
                 final int boxNumX=getWidth()/(boxWidth+boxGap);
                 final int boxNumY=5;
                 final int boxBaseX=((getWidth())-(boxWidth+boxGap)*boxNumX+boxGap)/2;
-                final int boxBaseY=boxGap;
+                final int boxBaseY=50;
 
                 for(int y=0; y<boxNumY; y++) {
                     for(int x=0; x<boxNumX; x++) {
                         b.add(new Block(boxBaseX+(boxWidth+boxGap)*x, boxBaseY+(boxHeight+boxGap)*y, boxWidth, boxHeight));
-                        b.get(b.size()-1).setStrength(10);
-                        System.out.println(b.get(b.size()-1));
+                        b.get(b.size()-1).setStrength(level);
                     }
                 }
-//                b.add(new Block(20, 20, 500, 50));
-            }
+            //}
 
             blocks=b;
         }

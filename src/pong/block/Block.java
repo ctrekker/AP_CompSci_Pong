@@ -44,6 +44,10 @@ public class Block {
     public void draw(Graphics2D g2) {
         g2.setColor(getColor());
         g2.fillRect(x, y, width, height);
+        g2.setColor(Color.WHITE);
+        if(getColor()==colors[1]) g2.setColor(Color.BLACK);
+        g2.setFont(new Font("Arial", Font.PLAIN, 10));
+        g2.drawString(strength+"", x+3, y+10);
     }
 
     public Color getColor() {
