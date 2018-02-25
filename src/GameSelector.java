@@ -1,3 +1,7 @@
+//Name - Connor Burns
+//Date - 2/26/18
+//Class - AP Comp Sci Period 7
+//Lab  - Pong
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
