@@ -5,13 +5,20 @@ import java.awt.event.ActionListener;
 
 public class GameSelector extends JFrame {
     public GameSelector() {
+        // Set window parameters
+        // NOTE: No setSize due to packing at end
         setTitle("Game selection");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
 
+        // Make a content pane w/ border layout
         JPanel pane=new JPanel(new BorderLayout());
+        // Make 3 buttons, one for each game
         JButton single=new JButton("Single Player");
         JButton original=new JButton("One vs. One");
         JButton block=new JButton("Block Breaker");
+        // Make a label that has all the instructions
+        // NOTE: This is written in javax.swing supported HTML
         JLabel instructions=new JLabel("<html>" +
                 "<b>General:</b><br>" +
                 "Click on a button to open the game!<br><br>" +
@@ -27,11 +34,13 @@ public class GameSelector extends JFrame {
                 "       This is valid because scoring is based on block breaks, not level" +
                 "</html>");
 
+        // Add each component to their appropriate locations on the border pane
         pane.add(single, BorderLayout.WEST);
         pane.add(original, BorderLayout.CENTER);
         pane.add(block, BorderLayout.EAST);
         pane.add(instructions, BorderLayout.NORTH);
 
+        // A bunch of action listeners which initialize a new game of each type, depending on which button was pressed
         single.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -51,9 +60,13 @@ public class GameSelector extends JFrame {
             }
         });
 
+        // Add the pane to the contentFrame
         add(pane);
+        // Pack the display
+        // NOTE: Pack compresses the window size to its minimum width/height based on component constraints
         pack();
 
+        // Make the frame visible
         setVisible(true);
     }
 }
