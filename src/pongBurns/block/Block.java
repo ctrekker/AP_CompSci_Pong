@@ -2,7 +2,7 @@
 //Date - 2/26/18
 //Class - AP Comp Sci Period 7
 //Lab  - Pong
-package pong.block;
+package pongBurns.block;
 
 import java.awt.*;
 

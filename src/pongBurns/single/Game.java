@@ -2,10 +2,10 @@
 //Date - 2/26/18
 //Class - AP Comp Sci Period 7
 //Lab  - Pong
-package pong.single;
+package pongBurns.single;
 
-import pong.original.Ball;
-import pong.original.Paddle;
+import pongBurns.original.Ball;
+import pongBurns.original.Paddle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -200,7 +200,7 @@ public class Game extends JFrame {
                         gameOver = true;
                     }
 
-                    // See pong.block.Game for details on speedUp
+                    // See pongBurns.block.Game for details on speedUp
                     if(speedUp) ballSpeed*=2;
                     ball.setX((ball.getX() + ball.getDirection().getX() * ballSpeed * ball.getDeltaX()));
                     ball.setY((ball.getY() + ball.getDirection().getY() * ballSpeed * ball.getDeltaY()));

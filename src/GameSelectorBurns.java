@@ -7,8 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class GameSelector extends JFrame {
-    public GameSelector() {
+public class GameSelectorBurns extends JFrame {
+    public GameSelectorBurns() {
         // Set window parameters
         // NOTE: No setSize due to packing at end
         setTitle("Game selection");
@@ -48,19 +48,19 @@ public class GameSelector extends JFrame {
         single.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new pong.single.Game();
+                new pongBurns.single.Game();
             }
         });
         original.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new pong.original.Game();
+                new pongBurns.original.Game();
             }
         });
         block.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new pong.block.Game();
+                new pongBurns.block.Game();
             }
         });
 

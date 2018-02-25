@@ -2,9 +2,9 @@
 //Date - 2/26/18
 //Class - AP Comp Sci Period 7
 //Lab  - Pong
-public class GeneralLauncher {
+public class GeneralLauncherBurns {
     public static void main(String[] args) {
-        // Make a new GameSelector on startup
-        new GameSelector();
+        // Make a new GameSelectorBurns on startup
+        new GameSelectorBurns();
     }
 }

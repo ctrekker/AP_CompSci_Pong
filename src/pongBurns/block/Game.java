@@ -2,10 +2,10 @@
 //Date - 2/26/18
 //Class - AP Comp Sci Period 7
 //Lab  - Pong
-package pong.block;
+package pongBurns.block;
 
-import pong.original.Ball;
-import pong.original.Paddle;
+import pongBurns.original.Ball;
+import pongBurns.original.Paddle;
 
 import javax.swing.*;
 import java.awt.*;
