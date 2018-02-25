@@ -14,29 +14,33 @@ public class Game extends JFrame {
     private Paddle player1;
     // Game second player (rightmost)
     private Paddle player2;
+    // Determines whether the 2nd player is an ai or not
+    private boolean ai=false;
     public Game() {
         // Set frame properties
         setTitle("Classic Pong");
         // Original game resolution is usually 640x400
         setSize(640, 400);
         setResizable(false);
+        // Don't destroy the process since that's what the startup screen is for
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create graphics instance (component-based)
         GameGraphics graphics = new GameGraphics();
         // Add it to the frame
         add(graphics);
+        // Listen for key presses on the frame
         addKeyListener(new KeyListener() {
             // Detect key press (down only)
             public void keyPressed(KeyEvent e) {
                 switch(e.getKeyCode()) {
                     // Up Arrow
                     case 38:
-                        player2.setMovement(new Point(0, -1));
+                        if(!ai) player2.setMovement(new Point(0, -1));
                         break;
                     // Down Arrow
                     case 40:
-                        player2.setMovement(new Point(0, 1));
+                        if(!ai) player2.setMovement(new Point(0, 1));
                         break;
                     // W
                     case 87:
@@ -45,6 +49,15 @@ public class Game extends JFrame {
                     // S
                     case 83:
                         player1.setMovement(new Point(0, 1));
+                        break;
+                    // A
+                    case 65:
+                        // Set ai mode to true
+                        ai=true;
+                        break;
+                    case 86:
+                        // Set ai mode to false
+                        ai=false;
                         break;
                 }
             }
@@ -100,6 +113,7 @@ public class Game extends JFrame {
         private int gameOverCounter=0;
         // Font used for the score
         private Font scoreFont=new Font("Arial", Font.PLAIN, 16);
+        private Font directionsFont=new Font("Arial", Font.PLAIN, 10);
         public GameGraphics() {
             // Create a new timer
             timer=new Timer("animation");
@@ -118,11 +132,20 @@ public class Game extends JFrame {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
 
+            // Draw the background as black
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, getWidth(), getHeight());
+
+            // Draw the central divider
+            g2.setColor(Color.WHITE);
+            g2.setStroke(new BasicStroke(3));
+            g2.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
+
             // Code to be run only on the first frame of the game
             if(firstTime) {
                 // Init all the important dynamic game aspects that don't initially need resetting
                 ball=new Ball(getWidth()/2, getHeight()/2);
-                ball.setDirection(new Point(1, 1));
+                ball.setDirection(randomDirectionPoint());
                 player1=new Paddle(PADDLE_MARGIN, getHeight()/2-Paddle.PADDLE_HEIGHT/2);
                 player2=new Paddle(getWidth()-Paddle.PADDLE_WIDTH-PADDLE_MARGIN, getHeight()/2-Paddle.PADDLE_HEIGHT/2);
 
@@ -130,12 +153,36 @@ public class Game extends JFrame {
                 firstTime=false;
             }
             if(!gameOver) {
+                // Change player2 y if ai is on
+                if(ai) {
+                    // Default to 0
+                    int direction=0;
+                    // If the player needs to move up, set its direction to up
+                    if(player2.getY()+player2.getHeight()/2>ball.getY()) direction=-1;
+                    // If the player needs to move down, set its direction to down
+                    else if(player2.getY()+player2.getHeight()/2<ball.getY()) direction=1;
+                    // Set the movement vector of the player
+                    player2.setMovement(new Point(0, direction));
+                }
+
                 // Perform paddle calculations
                 if ((player1.getY() > 0 && player1.getY() + player1.getHeight() < getHeight()) || ((player1.getY() <= 0 && player1.getMovement().getY() > 0) || (player1.getY() + player1.getHeight() >= getHeight() && player1.getMovement().getY() < 0))) {
+                    // Change y position based on movement direction
                     player1.setY((int) (player1.getY() + (player1.getMovement().getY() * paddleSpeed)));
                 }
                 if ((player2.getY() > 0 && player2.getY() + player2.getHeight() < getHeight()) || ((player2.getY() <= 0 && player2.getMovement().getY() > 0) || (player2.getY() + player2.getHeight() >= getHeight() && player2.getMovement().getY() < 0))) {
+                    // Same thing as above, except give the paddle different speed parameters depending on what it "wants"
+                    // Set a temporary paddle speed
+                    double tempPS=paddleSpeed;
+                    // Make the paddle go as fast as the ball until the ball surpasses 6 px/sec.
+                    if(ai&&ballSpeed<6) paddleSpeed=ballSpeed;
+                    // If its greater than six, the ai paddle speed should be the ball speed minus 1.5 px/sec.
+                    else if(ai&&ballSpeed>6) paddleSpeed=ballSpeed-1.5;
+                    // If it equals six, the ai paddle speed should be the ball speed minus 0.5 px/sec.
+                    else if(ai) paddleSpeed=ballSpeed-0.5;
                     player2.setY((int) (player2.getY() + (player2.getMovement().getY() * paddleSpeed)));
+                    // Reset paddle speed to what it was before this if statement
+                    paddleSpeed=tempPS;
                 }
 
                 // Perform ball calculations
@@ -144,11 +191,12 @@ public class Game extends JFrame {
                 } else if (ball.getY() + ball.getSize() / 2 >= getHeight()) {
                     ball.setDirection(new Point((int) ball.getDirection().getX(), -1));
                 }
-                // Check for paddle collision
+                // Check for paddle collision (player 1)
                 if (ball.getX() - ball.getSize() / 2 < player1.getX() + player1.getWidth() && ball.getX() + ball.getSize() / 2 > player1.getX() && ball.getY() > player1.getY() && ball.getY() < player1.getY() + player1.getHeight()) {
                     ball.setDirection(new Point(1, (int) ball.getDirection().getY()));
                     if (ballSpeed <= ballMaxSpeed) ballSpeed += 1;
                 }
+                // Check for paddle collision (player 2)
                 if (ball.getX() + ball.getSize() / 2 > player2.getX() && ball.getX() - ball.getSize() / 2 < player2.getX() + player2.getWidth() && ball.getY() > player2.getY() && ball.getY() < player2.getY() + player2.getHeight()) {
                     ball.setDirection(new Point(-1, (int) ball.getDirection().getY()));
                     if (ballSpeed <= ballMaxSpeed) ballSpeed += 1;
@@ -158,6 +206,7 @@ public class Game extends JFrame {
                     gameOver = true;
                 }
 
+                // Change ball x and y based on current directional vector
                 ball.setX((int) (ball.getX() + ball.getDirection().getX() * ballSpeed));
                 ball.setY((int) (ball.getY() + ball.getDirection().getY() * ballSpeed));
             }
@@ -165,6 +214,7 @@ public class Game extends JFrame {
             else {
                 // Get the winner string
                 String winner="Player 1 ";
+                // If it went off the player 2's side, that player lost
                 if(ball.getX()-ball.getSize()/2<0) {
                     winner="Player 2 ";
                 }
@@ -199,15 +249,6 @@ public class Game extends JFrame {
                 gameOverCounter++;
             }
 
-            // Draw the background as black
-            g2.setColor(Color.BLACK);
-            g2.fillRect(0, 0, getWidth(), getHeight());
-
-            // Draw the central divider
-            g2.setColor(Color.WHITE);
-            g2.setStroke(new BasicStroke(3));
-            g2.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
-
             // Draw the ball
             ball.draw(g2);
 
@@ -218,6 +259,18 @@ public class Game extends JFrame {
             // Draw the scores
             drawCenteredString(""+player1.getScore(), getWidth()/2-20, 25, scoreFont, g2);
             drawCenteredString(""+player2.getScore(), getWidth()/2+20, 25, scoreFont, g2);
+
+            // Draw ai/1v1 mode directions
+            if(ai) {
+                drawCenteredString("Press 'v' for standard mode", getWidth()-100, 6, directionsFont, g2);
+            }
+            else {
+                drawCenteredString("Press 'a' for ai mode", getWidth()-100, 6, directionsFont, g2);
+            }
+
+            // Draw current mode
+            if(ai) g2.drawString("Mode: AI", 10, 10);
+            else   g2.drawString("Mode: Standard", 10, 10);
         }
 
         // Returns a directional vector in a random y=x direction
@@ -250,6 +303,7 @@ public class Game extends JFrame {
             // Draw the string on the graphcis object
             Font pre=g.getFont();
             g.drawString(s, x-w/2+sX, y-h/2+sY);
+            // Set the font to what it was before this method call
             g.setFont(pre);
         }
     }

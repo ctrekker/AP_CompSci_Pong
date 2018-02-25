@@ -24,7 +24,7 @@ public class Game extends JFrame {
         balls=new ArrayList<>();
 
         // Set frame properties
-        setTitle("Classic Pong");
+        setTitle("Single Player Pong");
         // Original game resolution is usually 640x400
         setSize(480, 600);
         setResizable(false);
@@ -118,6 +118,11 @@ public class Game extends JFrame {
         }
         public void paint(Graphics g) {
             Graphics2D g2=(Graphics2D)g;
+
+            // For some reason by default on some computers this is off.
+            // When it is off, circles and other arcs draw in extreme low resolution (they look like hexagons!)
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
 
             if(firstTime) {
                 player=new Paddle(0, 0);
